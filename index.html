@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Mind Map</title>
+  
+  <script src="//unpkg.com/3d-force-graph"></script>
+  
+  <style>
+    body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #000; }
+    
+    /* The Information Overlay (Hidden by default) */
+    #info-panel {
+      position: absolute;
+      top: 0; right: -400px; /* Hidden off-screen */
+      width: 350px;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      border-left: 1px solid #333;
+      color: #fff;
+      padding: 20px;
+      transition: right 0.4s ease;
+      z-index: 10;
+      overflow-y: auto;
+    }
+
+    #info-panel.open { right: 0; }
+
+    /* Content styling */
+    h2 { color: #00d2ff; margin-top: 0; }
+    p { line-height: 1.6; color: #ccc; }
+    .topic-img { 
+      width: 100%; 
+      border-radius: 8px; 
+      margin-bottom: 15px; 
+      border: 1px solid #444;
+    }
+    
+    /* Close button */
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      cursor: pointer;
+      font-size: 24px;
+      color: #fff;
+    }
+    .close-btn:hover { color: #f00; }
+
+    /* Floating instruction text */
+    #instructions {
+      position: absolute;
+      bottom: 20px; left: 20px;
+      color: rgba(255,255,255,0.5);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="3d-graph"></div>
+
+  <div id="info-panel">
+    <div class="close-btn" onclick="closePanel()">&times;</div>
+    <div id="panel-content">
+      </div>
+  </div>
+
+  <div id="instructions">Left Click: Rotate | Right Click: Pan | Scroll: Zoom | Click Node: Open</div>
+
+  <script>
+    // 1. DATA: Define your topics, images, and stories here
+    // Change 'group' to color-code different categories
+    const gData = {
+      nodes: [
+        { 
+          id: "The Hero", 
+          group: 1, 
+          img: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300", 
+          desc: "The protagonist of our story. Born in the ashes of the old world, they seek the truth behind the floating isles." 
+        },
+        { 
+          id: "The Villain", 
+          group: 2, 
+          img: "https://images.unsplash.com/photo-1531384441138-2736e62e0919?auto=format&fit=crop&w=300", 
+          desc: "A shadow figure controlling the mind map. Nobody has seen their true face, only the digital corruption they leave behind." 
+        },
+        { 
+          id: "The Weapon", 
+          group: 1, 
+          img: "https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?auto=format&fit=crop&w=300", 
+          desc: "An ancient artifact capable of severing the connection between nodes. It was lost 500 years ago." 
+        },
+        { 
+          id: "The City", 
+          group: 3, 
+          img: "https://images.unsplash.com/photo-1480796927426-f609979314bd?auto=format&fit=crop&w=300", 
+          desc: "A cyberpunk metropolis where the data traders live. Neon lights hide the poverty within the lower sectors." 
+        },
+        { 
+          id: "The Secret", 
+          group: 3, 
+          img: "https://images.unsplash.com/photo-1504609773096-104ff10587bd?auto=format&fit=crop&w=300", 
+          desc: "Buried deep within the code, there is a ghost. It whispers to those who listen too closely." 
+        }
+      ],
+      links: [
+        { source: "The Hero", target: "The Weapon" },
+        { source: "The Hero", target: "The City" },
+        { source: "The Villain", target: "The Secret" },
+        { source: "The City", target: "The Secret" }
+      ]
+    };
+
+    // 2. SETUP: Initialize the 3D Graph
+    const Graph = ForceGraph3D()
+      (document.getElementById('3d-graph'))
+      .graphData(gData)
+      .nodeLabel('id') // Show name on hover
+      .nodeAutoColorBy('group') // Color by group
+      
+      // Look/Physics Customization
+      .backgroundColor('#000005') 
+      .linkColor(() => '#ffffff30')
+      .nodeResolution(20)
+      .linkWidth(2)
+      
+      // 3. INTERACTION: What happens when you click
+      .onNodeClick(node => {
+        // A. Fly the camera to the node
+        const distance = 40;
+        const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
+
+        Graph.cameraPosition(
+          { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }, // new position
+          node, // lookAt ({ x, y, z })
+          3000  // ms transition duration
+        );
+
+        // B. Open the info panel with data
+        openPanel(node);
+      });
+
+    // 4. UI FUNCTIONS
+    function openPanel(node) {
+      const panel = document.getElementById('info-panel');
+      const content = document.getElementById('panel-content');
+      
+      // Inject content dynamically based on the clicked node
+      content.innerHTML = `
+        <img src="${node.img}" class="topic-img" alt="${node.id}">
+        <h2>${node.id}</h2>
+        <p>${node.desc}</p>
+        <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
+        <p style="font-size: 0.8rem; color: #888;">ID: ${node.id} | Group: ${node.group}</p>
+      `;
+      
+      panel.classList.add('open');
+    }
+
+    function closePanel() {
+      document.getElementById('info-panel').classList.remove('open');
+      
+      // Optional: Zoom back out when closing
+      Graph.cameraPosition({ x: 0, y: 0, z: 300 }, { x: 0, y: 0, z: 0 }, 2000);
+    }
+    
+    // Resize graph if window changes
+    window.addEventListener('resize', () => {
+        Graph.width(window.innerWidth);
+        Graph.height(window.innerHeight);
+    });
+  </script>
+</body>
+</html>
+
