@@ -1,285 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sanatan Dharma: The Eternal Truth</title>
-  
-  <script src="//unpkg.com/three"></script>
-  <script src="//unpkg.com/3d-force-graph"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet">
-  
-  <style>
-    body { margin: 0; overflow: hidden; background: #000; font-family: 'Playfair Display', serif; }
-    
-    /* Cosmic Background & UI */
-    #info-panel {
-      position: absolute;
-      top: 0; right: -450px; /* Hidden initially */
-      width: 400px;
-      height: 100vh;
-      background: linear-gradient(to left, rgba(20, 10, 0, 0.95), rgba(40, 20, 5, 0.9));
-      border-left: 2px solid #FF9933; /* Saffron Border */
-      box-shadow: -5px 0 30px rgba(255, 153, 51, 0.3);
-      color: #fff;
-      padding: 30px;
-      transition: right 0.5s ease-in-out;
-      z-index: 10;
-      overflow-y: auto;
-    }
-
-    #info-panel.open { right: 0; }
-
-    /* Typography */
-    h1 { 
-        font-family: 'Cinzel', serif; 
-        color: #FFD700; /* Gold */
-        text-align: center;
-        border-bottom: 1px solid #FF9933;
-        padding-bottom: 10px;
-        margin-top: 0;
-    }
-    
-    h2 { font-family: 'Cinzel', serif; color: #FF9933; font-size: 1.2rem; margin-top: 20px; }
-    
-    p { 
-        line-height: 1.8; 
-        color: #e0d0c0; 
-        font-size: 1rem; 
-        text-align: justify;
-    }
-
-    .panel-img {
-      width: 100%;
-      border-radius: 8px;
-      border: 2px solid #554433;
-      box-shadow: 0 0 15px rgba(0,0,0,0.5);
-      margin-bottom: 20px;
-    }
-    
-    .close-btn {
-      position: absolute;
-      top: 15px; left: 15px;
-      cursor: pointer;
-      color: #FF9933;
-      font-size: 24px;
-      font-family: sans-serif;
-    }
-    
-    .instruction {
-        position: absolute; bottom: 20px; left: 20px;
-        color: #FF9933; opacity: 0.7; font-family: 'Cinzel', serif;
-        pointer-events: none;
-    }
-    
-    /* Scrollbar styling */
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: #1a1005; }
-    ::-webkit-scrollbar-thumb { background: #FF9933; border-radius: 4px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Mindmap</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: url('https://images.unsplash.com/photo-1464802686167-95917cdd6d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+            background-size: cover;
+            overflow: hidden;
+        }
+        #cy {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+    <script src="https://unpkg.com/@bardit/cytoscape-expand-collapse@2.0.3/cytoscape-expand-collapse.js"></script>
 </head>
 <body>
+    <div id="cy"></div>
+    <script>
+        // Register the extension
+        cytoscape.use(cytoscapeExpandCollapse);
 
-  <div id="3d-graph"></div>
+        // Initialize Cytoscape
+        var cy = cytoscape({
+            container: document.getElementById('cy'),
+            style: [
+                {
+                    selector: 'node',
+                    style: {
+                        'background-color': '#666',
+                        'background-image': 'data(image)',
+                        'background-fit': 'cover',
+                        'border-color': '#000',
+                        'border-width': 3,
+                        'border-opacity': 0.5,
+                        'label': 'data(label)',
+                        'text-valign': 'center',
+                        'text-halign': 'center',
+                        'color': '#fff',
+                        'text-outline-color': '#000',
+                        'text-outline-width': 2,
+                        'width': 100,
+                        'height': 100
+                    }
+                },
+                {
+                    selector: 'edge',
+                    style: {
+                        'width': 2,
+                        'line-color': '#ccc',
+                        'curve-style': 'bezier'
+                    }
+                },
+                {
+                    selector: ':parent',
+                    style: {
+                        'background-opacity': 0.333,
+                        'background-color': '#000',
+                        'shape': 'roundrectangle'
+                    }
+                }
+            ],
+            layout: {
+                name: 'cose',
+                idealEdgeLength: 100,
+                nodeOverlap: 20,
+                refresh: 20,
+                fit: true,
+                padding: 30,
+                randomize: false,
+                componentSpacing: 100,
+                nodeRepulsion: 400000,
+                edgeElasticity: 100,
+                nestingFactor: 5,
+                gravity: 80,
+                numIter: 1000,
+                initialTemp: 200,
+                coolingFactor: 0.95,
+                minTemp: 1.0
+            },
+            elements: [
+                // Main topics
+                { data: { id: 'topic1', label: 'Topic 1', image: 'https://via.placeholder.com/150?text=Topic1' } },
+                { data: { id: 'topic2', label: 'Topic 2', image: 'https://via.placeholder.com/150?text=Topic2' } },
+                
+                // Subtopics for Topic 1 (compound nodes)
+                { data: { id: 'sub1-1', label: 'Sub 1-1', parent: 'topic1', image: 'https://via.placeholder.com/150?text=Sub1-1', info: 'Information about Sub 1-1.' } },
+                { data: { id: 'sub1-2', label: 'Sub 1-2', parent: 'topic1', image: 'https://via.placeholder.com/150?text=Sub1-2', info: 'Information about Sub 1-2.' } },
+                
+                // Subtopics for Topic 2
+                { data: { id: 'sub2-1', label: 'Sub 2-1', parent: 'topic2', image: 'https://via.placeholder.com/150?text=Sub2-1', info: 'Information about Sub 2-1.' } },
+                
+                // Connections (strings/lines)
+                { data: { id: 'e1', source: 'topic1', target: 'topic2' } }
+            ]
+        });
 
-  <div id="info-panel">
-    <div class="close-btn" onclick="closePanel()">✕</div>
-    <div id="panel-content">
-      </div>
-  </div>
-  
-  <div class="instruction">Left Click: Rotate | Right Click: Pan | Scroll: Zoom | Click Node: Explore</div>
+        // Initialize expand-collapse API
+        var api = cy.expandCollapse({
+            layoutBy: {
+                name: 'cose',
+                animate: true,
+                randomize: false,
+                fit: true,
+                idealEdgeLength: 100,
+                nodeOverlap: 20,
+                refresh: 20,
+                padding: 30,
+                componentSpacing: 100,
+                nodeRepulsion: 400000,
+                edgeElasticity: 100,
+                nestingFactor: 5,
+                gravity: 80,
+                numIter: 1000,
+                initialTemp: 200,
+                coolingFactor: 0.95,
+                minTemp: 1.0
+            },
+            fisheye: true,
+            animate: true,
+            undoable: false
+        });
 
-  <script>
-    // ==========================================
-    // 1. THE HINDUISM KNOWLEDGE TREE (DATA)
-    // ==========================================
-    
-    const rootData = {
-      id: "Sanatan Dharma",
-      img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/The_Om_sound.svg/800px-The_Om_sound.svg.png", 
-      desc: "The Eternal Truth. Sanatan Dharma is not just a religion but a way of life, emphasizing Dharma (Duty), Karma (Action), and Moksha (Liberation). It is the root from which all knowledge flows.",
-      children: [
-        {
-          id: "The Trimurti",
-          img: "https://upload.wikimedia.org/wikipedia/commons/e/e6/Trimurti_Paints.jpg",
-          desc: "The Cosmic Trinity responsible for the cycle of the Universe: Creation, Preservation, and Destruction.",
-          children: [
-            { id: "Brahma", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Brahma_1910s_print.jpg/640px-Brahma_1910s_print.jpg", desc: "The Creator. The father of Manu, from whom all human beings are descended. He holds the Vedas in his hands." },
-            { id: "Vishnu", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Vishnu_Raja_Ravi_Varma.jpg/640px-Vishnu_Raja_Ravi_Varma.jpg", desc: "The Preserver. He incarnates in every age (Yuga) to restore Dharma. He rests on the serpent Adishesha in the cosmic ocean." },
-            { id: "Shiva", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Shiva_Raja_Ravi_Varma.jpg/640px-Shiva_Raja_Ravi_Varma.jpg", desc: "The Destroyer and Transformer. The Lord of Yoga and Meditation, dwelling on Mount Kailash. He is the stillness and the chaos." }
-          ]
-        },
-        {
-          id: "The Tridevi",
-          img: "https://upload.wikimedia.org/wikipedia/commons/f/ff/Raja_Ravi_Varma_-_Mahalakshmi.jpg", // Using Lakshmi as rep
-          desc: "The Feminine Divine Energy (Shakti) that empowers the Universe.",
-          children: [
-            { id: "Saraswati", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Raja_Ravi_Varma_-_Saraswati.jpg/640px-Raja_Ravi_Varma_-_Saraswati.jpg", desc: "Goddess of Knowledge, Music, Art, and Wisdom. Consort of Brahma." },
-            { id: "Lakshmi", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Raja_Ravi_Varma_-_Mahalakshmi.jpg/640px-Raja_Ravi_Varma_-_Mahalakshmi.jpg", desc: "Goddess of Wealth, Fortune, and Prosperity. Consort of Vishnu." },
-            { id: "Parvati", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Raja_Ravi_Varma_-_Parvati.jpg/640px-Raja_Ravi_Varma_-_Parvati.jpg", desc: "Goddess of Power and Devotion. Consort of Shiva. Forms include Durga and Kali." }
-          ]
-        },
-        {
-          id: "Itihasa (Epics)",
-          img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Gita_upadesham.jpg/640px-Gita_upadesham.jpg",
-          desc: "The great historical epics that teach Dharma through narrative.",
-          children: [
-            { id: "Ramayana", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Raja_Ravi_Varma_-_Ramapanchayatan.jpg/640px-Raja_Ravi_Varma_-_Ramapanchayatan.jpg", desc: "The journey of Lord Rama, the ideal man (Maryada Purushottam), and his battle against the demon king Ravana." },
-            { id: "Mahabharata", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Krishna_tells_gita_to_arjun.jpg/640px-Krishna_tells_gita_to_arjun.jpg", desc: "The longest epic poem known. It details the Kurukshetra war and contains the Bhagavad Gita." }
-          ]
-        },
-        {
-          id: "Holy Texts",
-          img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Rigveda_MS2097.jpg/640px-Rigveda_MS2097.jpg",
-          desc: "The shruti (heard) and smriti (remembered) scriptures.",
-          children: [
-            { id: "The Vedas", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Rigveda_MS2097.jpg/640px-Rigveda_MS2097.jpg", desc: "The oldest scriptures of Hinduism. Rigveda, Samaveda, Yajurveda, and Atharvaveda." },
-            { id: "Bhagavad Gita", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Gita_upadesham.jpg/640px-Gita_upadesham.jpg", desc: "The Song of God. A 700-verse scripture that is part of the Mahabharata, teaching the path of duty and devotion." }
-          ]
-        }
-      ]
-    };
+        // Collapse all initially for a clean start
+        api.collapseAll();
 
-    // ==========================================
-    // 2. TREE LOGIC (Expand/Collapse)
-    // ==========================================
-    
-    let nodes = [];
-    let links = [];
-
-    function flattenTree(node, parent = null) {
-      const graphNode = {
-        id: node.id,
-        img: node.img,
-        desc: node.desc,
-        childData: node.children || [],
-        collapsed: node.id !== "Sanatan Dharma", // Keep root open
-        parent: parent
-      };
-      
-      nodes.push(graphNode);
-      if (parent) links.push({ source: parent.id, target: node.id });
-      
-      if (node.children) {
-        node.children.forEach(child => flattenTree(child, graphNode));
-      }
-    }
-
-    flattenTree(rootData);
-
-    function getVisibleGraph() {
-      const visibleNodes = new Set();
-      const visibleLinks = [];
-
-      function isVisible(node) {
-        if (!node.parent) return true;
-        return !node.parent.collapsed && isVisible(node.parent);
-      }
-
-      nodes.forEach(n => {
-        if (isVisible(n)) visibleNodes.add(n);
-      });
-
-      links.forEach(l => {
-        const sourceId = l.source.id || l.source;
-        const targetId = l.target.id || l.target;
-        const sourceNode = nodes.find(n => n.id === sourceId);
-        const targetNode = nodes.find(n => n.id === targetId);
-
-        if (visibleNodes.has(sourceNode) && visibleNodes.has(targetNode)) {
-          visibleLinks.push(l);
-        }
-      });
-
-      return { nodes: Array.from(visibleNodes), links: visibleLinks };
-    }
-
-    // ==========================================
-    // 3. 3D GRAPH RENDERER
-    // ==========================================
-    
-    const elem = document.getElementById('3d-graph');
-    
-    const Graph = ForceGraph3D()
-      (elem)
-      .backgroundColor('#050200') // Very dark brown/black
-      .backgroundImageUrl('https://images.unsplash.com/photo-1534796636912-3b95b3ab5980?auto=format&fit=crop&w=2000&q=80')
-      .nodeLabel('id')
-      .linkColor(() => '#FF9933') // Saffron Links
-      .linkWidth(1.5)
-      .linkOpacity(0.6)
-      .graphData(getVisibleGraph())
-      .onNodeClick(handleNodeClick);
-
-    // ==========================================
-    // 4. IMAGE SPRITES (The Floating Images)
-    // ==========================================
-    
-    Graph.nodeThreeObject(node => {
-      const imgTexture = new THREE.TextureLoader().load(node.img);
-      const material = new THREE.SpriteMaterial({ map: imgTexture });
-      const sprite = new THREE.Sprite(material);
-      
-      // Make Root (Om) larger than others
-      const scale = node.id === "Sanatan Dharma" ? 40 : 25;
-      sprite.scale.set(scale, scale, 1);
-      return sprite;
-    });
-
-    // ==========================================
-    // 5. INTERACTION & UI
-    // ==========================================
-
-    function handleNodeClick(node) {
-      // 1. Zoom Camera
-      const distance = 70;
-      const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
-      Graph.cameraPosition(
-        { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }, 
-        node, 
-        2000
-      );
-
-      // 2. Open Info Panel
-      openPanel(node);
-
-      // 3. Expand/Collapse Children
-      if (node.childData && node.childData.length > 0) {
-        node.collapsed = !node.collapsed;
-        const { nodes: newNodes, links: newLinks } = getVisibleGraph();
-        Graph.graphData({ nodes: newNodes, links: newLinks });
-      }
-    }
-
-    function openPanel(node) {
-      const panel = document.getElementById('info-panel');
-      const content = document.getElementById('panel-content');
-      
-      // Dynamic Hindu Styling for content
-      content.innerHTML = `
-        <img src="${node.img}" class="panel-img" alt="${node.id}">
-        <h1>${node.id}</h1>
-        <p>${node.desc}</p>
-        <div style="margin-top:20px; border-top:1px solid #FF9933; padding-top:10px;">
-           <small style="color:#FFD700; font-family:'Cinzel';">
-             ${node.childData.length > 0 ? "✧ Tap the node in space to reveal sub-topics ✧" : "✧ End of Branch ✧"}
-           </small>
-        </div>
-      `;
-      
-      panel.classList.add('open');
-    }
-
-    function closePanel() {
-      document.getElementById('info-panel').classList.remove('open');
-    }
-
-    // Responsive Resize
-    window.addEventListener('resize', () => {
-      Graph.width(window.innerWidth);
-      Graph.height(window.innerHeight);
-    });
-  </script>
+        // Handle tap events for expand/collapse or show info
+        cy.on('tap', 'node', function(evt) {
+            var node = evt.target;
+            if (node.isParent() || node.children().length > 0) {
+                // If it's a parent (has subtopics), toggle expand/collapse
+                if (api.isExpanded(node)) {
+                    api.collapseRecursively(node);
+                } else {
+                    api.expandRecursively(node);
+                }
+            } else {
+                // If leaf node, show info (you can replace alert with a modal or panel)
+                alert(node.data('info') + '\n\nImage: ' + node.data('image'));
+            }
+        });
+    </script>
 </body>
 </html>
